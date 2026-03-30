@@ -10,7 +10,7 @@ class Sanitizer {
      * @param input The string to transform.
      * @return The normalized string.
      */
-    fun transform(input: String): String {
+    fun transform(input: String, deduplicate: Boolean = true): String {
         var out = input.lowercase()
 
         // 1. Replace common character substitutions
@@ -24,7 +24,7 @@ class Sanitizer {
         out = NON_ALPHANUMERIC_REGEX.replace(out, "")
 
         // 3. Deduplicate repeated letters if the word is long enough
-        if (out.length > 3) {
+        if (deduplicate && out.length > 3) {
             out = DUPLICATE_LETTERS_REGEX.replace(out, "$1")
         }
 
@@ -96,15 +96,15 @@ class Sanitizer {
      * @param strict Whether to use strict normalization (e.g. homoglyph conversion).
      * @return The censored string.
      */
-    fun replace(originalString: String, toCensorArray: List<String>, replacement: String? = null, strict: Boolean = true): String {
+    fun replace(originalString: String, toCensorArray: List<String>, replacement: String? = null, strict: Boolean = true, deduplicate: Boolean = true): String {
         val preparedCensorArray = toCensorArray.mapIndexedNotNull { index, s ->
-            val transformed = transform(convert(s, strict))
+            val transformed = transform(convert(s, strict), deduplicate)
             if (transformed.isNotEmpty()) index to transformed else null
         }
 
         val preparedArray = originalString.split(' ').map { originalWord ->
             val latinizedWord = convert(originalWord, strict)
-            val transformedWord = transform(latinizedWord)
+            val transformedWord = transform(latinizedWord, deduplicate)
 
             var censoredWord: String? = null
             var foundPatternIndex = -1
