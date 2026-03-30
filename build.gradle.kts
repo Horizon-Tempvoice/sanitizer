@@ -29,8 +29,9 @@ java {
 }
 
 val dokkaJavadocJar by tasks.registering(Jar::class) {
-    dependsOn(tasks.dokkaHtml)
-    from(tasks.dokkaHtml.flatMap { it.outputDirectory })
+    val dokkaTask = tasks.named("dokkaGeneratePublicationHtml")
+    dependsOn(dokkaTask)
+    from(dokkaTask.map { it.outputs.files })
     archiveClassifier.set("javadoc")
 }
 
