@@ -1,5 +1,6 @@
 plugins {
     kotlin("jvm") version "2.3.0"
+    id("org.jetbrains.dokka") version "2.2.0"
     `maven-publish`
     `java-library`
 }
@@ -27,10 +28,17 @@ java {
     withSourcesJar()
 }
 
+val dokkaJavadocJar by tasks.registering(Jar::class) {
+    dependsOn(tasks.dokkaHtml)
+    from(tasks.dokkaHtml.flatMap { it.outputDirectory })
+    archiveClassifier.set("javadoc")
+}
+
 publishing {
     publications {
         create<MavenPublication>("mavenKotlin") {
             from(components["java"])
+            artifact(dokkaJavadocJar)
 
             groupId = project.group.toString()
             artifactId = "string-sanitizer"
